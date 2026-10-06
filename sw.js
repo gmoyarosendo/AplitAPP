@@ -1,14 +1,24 @@
-const CACHE_NAME = 'aplitapp-cache-v8';
+const CACHE_NAME = 'aplitapp-cache-v10';
 const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json'
+  '/AplitAPP/',
+  '/AplitAPP/index.html',
+  '/AplitAPP/manifest.json',
+  // Añade aquí las rutas exactas de tus archivos principales (ejemplos):
+  '/AplitAPP/style.css',
+  '/AplitAPP/app.js',
+  '/AplitAPP/favicon.ico'
+  // Agrega también cualquier otro archivo o icono que use tu app
 ];
 
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+      .then(cache => {
+        // Usamos allSettled o un bucle para evitar que si un archivo falla, falle todo el Service Worker
+        return Promise.allSettled(
+          urlsToCache.map(url => cache.add(url))
+        );
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -35,7 +45,7 @@ self.addEventListener('fetch', event => {
           return networkResponse;
         });
       }).catch(() => {
-        return caches.match('./index.html') || caches.match('./');
+        return caches.match('/AplitAPP/index.html');
       });
     })
   );
