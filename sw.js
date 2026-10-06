@@ -1,17 +1,8 @@
-const CACHE_NAME = 'aplitapp-cache-v5';
-const urlsToCache = [
-  '/AplitAPP/',
-  '/AplitAPP/index.html'
-];
+const CACHE_NAME = 'aplitapp-cache-v6';
 
+// Instalar y activar de inmediato
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => self.skipWaiting())
-  );
+  self.skipWaiting();
 });
 
 self.addEventListener('activate', event => {
@@ -28,11 +19,21 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Interceptar y guardar dinámicamente en caché cada página visitada
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        return response || fetch(event.request);
+        // Si está en caché, lo devuelve; si no, lo busca en la red y lo guarda
+        return response || fetch(event.request).then(fetchResponse => {
+          return caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, fetchResponse.clone());
+            return fetchResponse;
+          });
+        }).catch(() => {
+          // Si falla la red y no está en caché, puedes retornar una vista alternativa
+          return caches.match('./index.html');
+        });
       })
   );
 });
