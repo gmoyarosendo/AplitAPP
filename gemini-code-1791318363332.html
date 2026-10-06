@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>APLITAPP - ApliTek RAIL SOLUTIONS</title>
+    
+    <meta name="apple-mobile-web-app-title" content="APLITAPP">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#03050c">
+    <meta name="mobile-web-app-capable" content="yes">
+    
+    <link rel="apple-touch-icon" href="logo_2.png">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22APLITAPP%20-%20ApliTek%20RAIL%20SOLUTIONS%22%2C%22short_name%22%3A%22APLITAPP%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%2303050c%22%2C%22theme_color%22%3A%22%2303050c%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22logo_2.png%22%2C%22sizes%22%3A%22192x192%20512x512%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D">
+
+    <style>
+        :root {
+            --bg-dark: #03050c;
+            --header-bg: rgba(7, 11, 22, 0.85);
+            --card-bg: rgba(13, 20, 36, 0.75);
+            --card-border: rgba(0, 240, 255, 0.2);
+            --accent-blue: #00f0ff;
+            --accent-glow: rgba(0, 240, 255, 0.4);
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --text-main: #f9fafb;
+            --text-sub: #9ca3af;
+            --nav-bg: rgba(7, 11, 22, 0.9);
+            --nav-height: 60px;
+        }
+
+        body.light-mode {
+            --bg-dark: #f3f4f6;
+            --header-bg: rgba(255, 255, 255, 0.95);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: #d1d5db;
+            --accent-blue: #0284c7;
+            --accent-glow: rgba(2, 132, 199, 0.3);
+            --accent-green: #059669;
+            --accent-red: #dc2626;
+            --accent-yellow: #d97706;
+            --text-main: #111827;
+            --text-sub: #4b5563;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: calc(var(--nav-height) + 12px);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #ai-neural-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -999;
+            pointer-events: none;
+            background: #03050c;
+        }
+
+        body.light-mode #ai-neural-canvas {
+            background: #f3f4f6;
+        }
+
+        .view-screen {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            display: none;
+            position: relative;
+            z-index: 2;
+        }
+
+        .view-screen.active {
+            opacity: 1;
+            transform: translateY(0);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh; height: 100dvh;
+            background: radial-gradient(circle at center, #070d1d 0%, #03050c 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            padding: 24px;
+        }
+
+        .splash-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            max-width: 900px;
+        }
+
+        .splash-logo-container {
+            width: 95vw;
+            max-width: 750px;
+            margin-bottom: 24px;
+            filter: drop-shadow(0px 0px 35px var(--accent-glow));
+        }
+
+        .splash-logo-container svg {
+            width: 100%; height: auto; display: block;
+        }
+
+        @keyframes spinWheel {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .animated-wheel {
+            transform-origin: 105px 105px;
+            animation: spinWheel 3.5s linear infinite;
+        }
+
+        .animated-wheel-fast {
+            transform-origin: 105px 105px;
+            animation: spinWheel 2s linear infinite;
+        }
+
+        .header-wheel-spin {
+            transform-origin: 50px 50px;
+            animation: spinWheel 5s linear infinite;
+        }
+
+        .loading-bar-container {
+            width: 80%;
+            max-width: 320px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .loading-bar-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #0077b6, #00f0ff, #10b981);
+            position: absolute;
+            left: -100%;
+            animation: loadingFill 1.5s ease-in-out forwards;
+        }
+
+        @keyframes loadingFill {
+            0% { left: -100%; }
+            100% { left: 0%; }
+        }
+
+        .btn-skip-splash {
+            background: rgba(0, 240, 255, 0.15);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn-skip-splash:hover {
+            background: var(--accent-blue);
+            color: var(--bg-dark);
+        }
+
+        header {
+            background-color: var(--header-bg);
+            backdrop-filter: blur(12px);
+            padding: 10px 14px;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .brand-header {
+            display: flex; align-items: center; gap: 8px; cursor: pointer; flex-shrink: 0;
+        }
+        .header-logo-svg { width: 38px; height: 38px; flex-shrink: 0; }
+        .brand-text-container { display: flex; flex-direction: column; }
+        .brand-title { font-size: 1rem; font-weight: 900; color: var(--text-main); line-height: 1.1; }
+        .brand-subtitle { font-size: 0.55rem; font-weight: 700; color: var(--accent-blue); margin-top: 2px; text-transform: uppercase; }
+
+        .header-right-separated { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--text-main); }
+        .header-tool-btn {
+            background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main);
+            cursor: pointer; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        }
+        .header-info-col { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+        .header-meta-row { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 0.7rem; }
+        .status-pill { color: var(--accent-green); font-weight: 700; }
+        .status-pill.offline { color: var(--accent-red); }
+        .app-version-info { font-size: 0.52rem; color: var(--text-sub); }
+
+        #main-selector-screen { padding: 20px 16px; max-width: 800px; margin: 0 auto; width: 100%; gap: 12px; }
+
+        .weather-widget-container {
+            background: linear-gradient(135deg, rgba(13, 20, 36, 0.85), rgba(7, 11, 22, 0.9));
+            border: 1.5px solid rgba(0, 240, 255, 0.3);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 240, 255, 0.1);
+            backdrop-filter: blur(12px);
+        }
+        .weather-widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 8px;
+        }
+        .weather-widget-title {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .weather-days-grid {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding-bottom: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-blue) rgba(255, 255, 255, 0.05);
+        }
+        .weather-days-grid::-webkit-scrollbar { height: 4px; }
+        .weather-days-grid::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+        .weather-days-grid::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 4px; }
+
+        .weather-day-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 95px;
+            min-width: 82px;
+            flex: 0 0 auto;
+            scroll-snap-align: start;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .weather-day-card:hover {
+            border-color: var(--accent-blue);
+            background: rgba(0, 240, 255, 0.08);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 240, 255, 0.2);
+        }
+        .weather-day-card.now-card {
+            border: 1.5px solid var(--accent-blue);
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(0, 119, 182, 0.2));
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+        }
+        .weather-day-name {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .weather-day-name.now-text {
+            color: var(--accent-blue);
+            font-weight: 900;
+        }
+        .weather-day-icon {
+            font-size: 1.3rem;
+            margin: 4px 0;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+        .weather-day-temps {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.62rem;
+            gap: 1px;
+            align-items: center;
+        }
+        .temp-max { font-weight: 800; color: var(--text-main); }
+        .temp-min { font-weight: 600; color: var(--text-sub); }
+        .rain-prob {
+            font-size: 0.55rem;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-top: 2px;
+            background: rgba(56, 189, 248, 0.1);
+            padding: 1px 4px;
+            border-radius: 4px;
+        }
+
+        #weatherModal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh;
+            background: rgba(3, 5, 12, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 100000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .weather-modal-content {
+            background: radial-gradient(circle at top, #1e293b 0%, #070b16 100%);
+            border: 1px solid var(--accent-blue);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 550px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+            overflow: hidden;
+        }
+        .weather-modal-header {
+            padding: 16px 20px;
+            background: rgba(0, 240, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .weather-modal-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .weather-modal-close {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .weather-modal-close:hover {
+            background: var(--accent-blue);
+            color: var(--bg-dark);
+        }
+        .weather-hourly-scroll {
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .hourly-row {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        .hourly-time { font-weight: 700; color: var(--text-sub); }
+        .hourly-info { display: flex; align-items: center; gap: 14px; font-weight: 600; }
+        .hourly-temp { font-weight: 800; color: var(--text-main); font-size: 0.95rem; }
+        .hourly-rain { color: #38bdf8; font-size: 0.78rem; background: rgba(56, 189, 248, 0.1); padding: 2px 6px; border-radius: 6px; }
+
+        .last-doc-card {
+            background: var(--card-bg); border: 1.5px dashed var(--accent-blue); border-radius: 14px; padding: 14px 18px;
+            display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;
+            backdrop-filter: blur(10px);
+        }
+        .last-doc-info span { font-size: 0.65rem; text-transform: uppercase; font-weight: 800; color: var(--accent-blue); }
+        .last-doc-info h4 { font-size: 0.95rem; color: var(--text-main); }
+        .last-doc-btn {
+            background: var(--accent-blue); color: var(--bg-dark); text-decoration: none; font-size: 0.78rem; font-weight: 800; padding: 6px 14px; border-radius: 8px;
+        }
+
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .quick-action-card {
+            border-radius: 10px; padding: 8px 6px;
+            display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15); gap: 4px;
+            backdrop-filter: blur(10px);
+        }
+        .quick-action-card span { font-size: 0.52rem; text-transform: uppercase; font-weight: 800; }
+        .quick-action-card h4 { font-size: 0.72rem; color: var(--text-main); line-height: 1.1; }
+        .qa-icon { font-size: 1.1rem; }
+
+        .qa-whatsapp { background: linear-gradient(135deg, rgba(37, 211, 102, 0.15), rgba(16, 185, 129, 0.2)); border: 1.2px solid #25d366; }
+        .qa-whatsapp span { color: #25d366; }
+
+        .qa-email { background: linear-gradient(135deg, rgba(0, 119, 182, 0.15), rgba(2, 132, 199, 0.2)); border: 1.2px solid #0077b6; }
+        .qa-email span { color: #00f0ff; }
+
+        .qa-contact { background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(217, 119, 6, 0.2)); border: 1.2px solid #f59e0b; }
+        .qa-contact span { color: #f59e0b; }
+
+        .main-category-card {
+            background: var(--card-bg); border: 2px solid var(--card-border); border-radius: 16px; padding: 18px 20px;
+            display: flex; align-items: center; gap: 18px; cursor: pointer; margin-bottom: 12px; position: relative;
+            backdrop-filter: blur(10px);
+        }
+        .main-category-card:hover { border-color: var(--accent-blue); box-shadow: 0 0 20px var(--accent-glow); }
+        .main-category-icon {
+            font-size: 2.2rem; background: rgba(0, 240, 255, 0.1); width: 60px; height: 60px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .main-category-info h2 { font-size: 1.25rem; color: var(--text-main); }
+        .main-category-info p { font-size: 0.82rem; color: var(--text-sub); }
+        .resource-count-badge {
+            position: absolute; top: 14px; right: 45px; background: rgba(128, 128, 128, 0.15);
+            font-size: 0.65rem; font-weight: 700; padding: 2px 8px; border-radius: 8px; color: var(--text-sub);
+        }
+        .main-category-arrow { font-size: 1.3rem; color: var(--accent-blue); }
+
+        .dashboard-container { padding: 16px; max-width: 1200px; margin: 0 auto; width: 100%; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+        .section-title { font-size: 1.2rem; font-weight: 800; color: var(--accent-blue); }
+        .btn-back {
+            background: var(--card-bg); color: var(--text-main); border: 1px solid var(--card-border); padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; cursor: pointer;
+        }
+
+        .search-box-container { padding: 0 4px 14px 4px; }
+        .search-input {
+            width: 100%; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 10px; padding: 10px 14px; color: var(--text-main); outline: none;
+            backdrop-filter: blur(10px);
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+        @media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+
+        .card {
+            background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 12px;
+            display: flex; flex-direction: column; justify-content: space-between; min-height: 135px; position: relative;
+            backdrop-filter: blur(10px);
+        }
+        .card-top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+        .card-header { display: flex; align-items: center; gap: 10px; }
+        .card-icon {
+            font-size: 1.3rem; background: rgba(128, 128, 128, 0.1); width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+        }
+        .card-title { font-size: 0.88rem; font-weight: 700; color: var(--text-main); }
+        .card-desc { font-size: 0.73rem; color: var(--text-sub); margin-top: 3px; }
+        .btn-fav { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-sub); }
+        .btn-fav.is-favorite { color: var(--accent-yellow); }
+        .card-footer { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--card-border); display: flex; justify-content: space-between; align-items: center; }
+        .badge { font-size: 0.62rem; text-transform: uppercase; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(128, 128, 128, 0.15); color: var(--text-sub); }
+        .card-link { color: var(--accent-blue); text-decoration: none; font-size: 0.78rem; font-weight: 700; padding: 4px 8px; background: rgba(0, 240, 255, 0.1); border-radius: 6px; }
+
+        .empty-state { text-align: center; color: var(--text-sub); padding: 40px 20px; font-size: 0.9rem; grid-column: 1 / -1; }
+
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height);
+            background-color: var(--nav-bg); backdrop-filter: blur(12px);
+            border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; align-items: center; z-index: 50;
+        }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-sub); font-size: 0.6rem; font-weight: 600; background: none; border: none; cursor: pointer; padding: 4px; }
+        .nav-item.active { color: var(--accent-blue); }
+        .nav-icon { font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+    <canvas id="ai-neural-canvas"></canvas>
+
+    <div id="weatherModal" onclick="closeWeatherModal(event)">
+        <div class="weather-modal-content" onclick="event.stopPropagation()">
+            <div class="weather-modal-header">
+                <span class="weather-modal-title" id="modalDayTitle">Previsión Hora a Hora</span>
+                <button class="weather-modal-close" onclick="closeWeatherModal()">✕</button>
+            </div>
+            <div class="weather-hourly-scroll" id="hourlyScrollContainer"></div>
+        </div>
+    </div>
+
+    <div id="splash-screen">
+        <div class="splash-content">
+            <div class="splash-logo-container">
+                <svg viewBox="0 0 750 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="neonGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#00f0ff" />
+                            <stop offset="100%" stop-color="#0077b6" />
+                        </linearGradient>
+                        <linearGradient id="darkBg" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#070d1d" />
+                            <stop offset="100%" stop-color="#03050c" />
+                        </linearGradient>
+                    </defs>
+                    <rect width="750" height="210" rx="28" fill="url(#darkBg)" stroke="#1f2937" stroke-width="2"/>
+                    <g transform="translate(15, 0)">
+                        <circle cx="105" cy="105" r="76" stroke="#00f0ff" stroke-width="2" stroke-dasharray="8 6" opacity="0.4"/>
+                        <g class="animated-wheel">
+                            <circle cx="105" cy="105" r="68" fill="#0b1329" stroke="url(#neonGlow)" stroke-width="6"/>
+                            <circle cx="105" cy="105" r="48" fill="#030712" stroke="#00f0ff" stroke-width="3"/>
+                            <circle cx="105" cy="67" r="8" fill="#00f0ff" opacity="0.9"/>
+                            <circle cx="143" cy="105" r="8" fill="#00f0ff" opacity="0.9"/>
+                            <circle cx="105" cy="143" r="8" fill="#00f0ff" opacity="0.9"/>
+                            <circle cx="67" cy="105" r="8" fill="#00f0ff" opacity="0.9"/>
+                        </g>
+                        <g class="animated-wheel-fast">
+                            <circle cx="105" cy="105" r="16" fill="#00f0ff"/>
+                            <circle cx="105" cy="105" r="6" fill="#ffffff"/>
+                        </g>
+                    </g>
+                    <text x="245" y="112" font-family="-apple-system, sans-serif" font-weight="900" font-size="64" fill="#ffffff" letter-spacing="4">APLITAPP</text>
+                    <text x="248" y="152" font-family="-apple-system, sans-serif" font-weight="800" font-size="22" fill="#00f0ff" letter-spacing="4">ApliTek RAIL SOLUTIONS</text>
+                </svg>
+            </div>
+            <div class="loading-bar-container">
+                <div class="loading-bar-fill"></div>
+            </div>
+            <button class="btn-skip-splash" onclick="dismissSplash()">Entrar a la App ⚡</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="brand-header" onclick="showMainSelector()">
+            <svg class="header-logo-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="100" rx="20" fill="#0f172a" stroke="#00f0ff" stroke-width="2"/>
+                <line x1="10" y1="88" x2="90" y2="88" stroke="#00f0ff" stroke-width="3"/>
+                <g class="header-wheel-spin">
+                    <circle cx="50" cy="46" r="30" fill="#030712" stroke="#00f0ff" stroke-width="4"/>
+                    <circle cx="50" cy="46" r="18" fill="#0077b6" stroke="#00f0ff" stroke-width="2"/>
+                    <circle cx="50" cy="46" r="6" fill="#ffffff"/>
+                </g>
+            </svg>
+            <div class="brand-text-container">
+                <span class="brand-title">APLITAPP</span>
+                <span class="brand-subtitle">ApliTek RAIL SOLUTIONS</span>
+            </div>
+        </div>
+
+        <div class="header-right-separated">
+            <button class="header-tool-btn" title="Pantalla Completa" onclick="toggleFullScreen()">⛶</button>
+            <button class="header-tool-btn" id="themeToggleBtn" title="Cambiar Tema" onclick="toggleTheme()">🌙</button>
+            <div class="header-info-col">
+                <div class="header-meta-row">
+                    <span id="headerClock">01:50</span>
+                    <span>📍 Amorebieta</span>
+                </div>
+                <div class="header-meta-row">
+                    <span id="connectionStatus" class="status-pill">● Online</span>
+                    <span class="app-version-info" id="updateTimestamp">Act: --/--/----</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="main-selector-screen" class="view-screen active">
+        
+        <div class="weather-widget-container">
+            <div class="weather-widget-header">
+                <span class="weather-widget-title">⚡ METEOROLOGÍA AMOREBIETA</span>
+                <span id="weatherStatusTime" style="font-size:0.6rem; color:var(--text-sub);">Actualizando...</span>
+            </div>
+            <div class="weather-days-grid" id="weatherDaysGrid">
+                <div class="weather-day-card"><span class="weather-day-name">---</span><span class="weather-day-icon">⏳</span><div class="weather-day-temps"><span class="temp-max">--°</span><span class="temp-min">--°</span></div></div>
+                <div class="weather-day-card"><span class="weather-day-name">---</span><span class="weather-day-icon">⏳</span><div class="weather-day-temps"><span class="temp-max">--°</span><span class="temp-min">--°</span></div></div>
+                <div class="weather-day-card"><span class="weather-day-name">---</span><span class="weather-day-icon">⏳</span><div class="weather-day-temps"><span class="temp-max">--°</span><span class="temp-min">--°</span></div></div>
+                <div class="weather-day-card"><span class="weather-day-name">---</span><span class="weather-day-icon">⏳</span><div class="weather-day-temps"><span class="temp-max">--°</span><span class="temp-min">--°</span></div></div>
+                <div class="weather-day-card"><span class="weather-day-name">---</span><span class="weather-day-icon">⏳</span><div class="weather-day-temps"><span class="temp-max">--°</span><span class="temp-min">--°</span></div></div>
+                <div class="weather-day-card"><span class="weather-day-name">---</span><span class="weather-day-icon">⏳</span><div class="weather-day-temps"><span class="temp-max">--°</span><span class="temp-min">--°</span></div></div>
+                <div class="weather-day-card"><span class="weather-day-name">---</span><span class="weather-day-icon">⏳</span><div class="weather-day-temps"><span class="temp-max">--°</span><span class="temp-min">--°</span></div></div>
+            </div>
+        </div>
+
+        <div class="last-doc-card">
+            <div class="last-doc-info">
+                <span>Último documento abierto</span>
+                <h4 id="lastDocTitle">3. Planos de Ruedas</h4>
+            </div>
+            <a class="last-doc-btn" id="lastDocBtn" href="https://railsolutionsslu-my.sharepoint.com/:f:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IgAsR3vxNz9SQI3lfMmRhkl_AabQG9CeLMRSjiXRrKsqikw" target="_blank" onclick="trackLastDoc('3. Planos de Ruedas', this.href)">Abrir →</a>
+        </div>
+
+        <div class="quick-actions-grid">
+            <div class="quick-action-card qa-whatsapp" onclick="openWhatsAppDirect()">
+                <div class="qa-icon">💬</div>
+                <div>
+                    <span>Abrir</span>
+                    <h4>WhatsApp</h4>
+                </div>
+            </div>
+
+            <div class="quick-action-card qa-email" onclick="sendEmailNotice()">
+                <div class="qa-icon">✉️</div>
+                <div>
+                    <span>Redactar</span>
+                    <h4>Correo</h4>
+                </div>
+            </div>
+
+            <div class="quick-action-card qa-contact" onclick="openContactsOrCall()">
+                <div class="qa-icon">📞</div>
+                <div>
+                    <span>Agenda</span>
+                    <h4>Llamar</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-category-card" onclick="openSection('ruedas', 'RUEDAS DE TREN')">
+            <div class="main-category-icon">⚙</div>
+            <div class="main-category-info">
+                <h2>Ruedas</h2>
+                <p>Gestión, planos, pintura y planificación de ruedas.</p>
+            </div>
+            <span class="resource-count-badge">8 recursos</span>
+            <div class="main-category-arrow">→</div>
+        </div>
+
+        <div class="main-category-card" onclick="openSection('eje-suelto', 'EJE SUELTO')">
+            <div class="main-category-icon">📏</div>
+            <div class="main-category-info">
+                <h2>Eje Suelto</h2>
+                <p>Información técnica, pintura y mecanizado de ejes.</p>
+            </div>
+            <span class="resource-count-badge">2 recursos</span>
+            <div class="main-category-arrow">→</div>
+        </div>
+
+        <div class="main-category-card" onclick="openSection('eje-montado', 'EJE MONTADO')">
+            <div class="main-category-icon">🚆</div>
+            <div class="main-category-info">
+                <h2>Eje Montado</h2>
+                <p>Control de calado, montaje y conjuntos de ejes.</p>
+            </div>
+            <span class="resource-count-badge">1 recurso</span>
+            <div class="main-category-arrow">→</div>
+        </div>
+    </div>
+
+    <div class="view-screen" id="dashboard">
+        <div class="dashboard-container">
+            <div class="section-header">
+                <span class="section-title" id="current-section-title">RUEDAS</span>
+                <button class="btn-back" onclick="showMainSelector()">← Menú</button>
+            </div>
+
+            <div class="search-box-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar documento o plano..." onkeyup="filterCards()">
+            </div>
+
+            <div class="grid" id="main-grid">
+                <div class="card" data-id="rueda-1" data-main-cat="ruedas">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">⚙</span><div><div class="card-title">1. Ruedas Sin Pintar</div><div class="card-desc">Estado e inspección.</div></div></div><button class="btn-fav" onclick="toggleFavorite('rueda-1', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">SharePoint</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:x:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IQDbtMONQJT9TJeRuOBHV8d4ARW7etQ_24LRPiQMb90rVB4?e=ekMz1Y&ActiveCell=RES_SIN_PINTAR_!A1" target="_blank" onclick="trackLastDoc('1. Ruedas Sin Pintar', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="rueda-2" data-main-cat="ruedas">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">🎨</span><div><div class="card-title">2. Ruedas Pintadas</div><div class="card-desc">Registro y salida.</div></div></div><button class="btn-fav" onclick="toggleFavorite('rueda-2', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">SharePoint</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:x:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IQDbtMONQJT9TJeRuOBHV8d4ARW7etQ_24LRPiQMb90rVB4?e=ekMz1Y&ActiveCell=RES_SIN_ENVIAR!A1" target="_blank" onclick="trackLastDoc('2. Ruedas Pintadas', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="rueda-3" data-main-cat="ruedas">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">📐</span><div><div class="card-title">3. Planos de Ruedas</div><div class="card-desc">Carpeta FZ con cotas.</div></div></div><button class="btn-fav" onclick="toggleFavorite('rueda-3', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Carpeta FZ</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:f:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IgAsR3vxNz9SQI3lfMmRhkl_AabQG9CeLMRSjiXRrKsqikw" target="_blank" onclick="trackLastDoc('3. Planos de Ruedas', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="rueda-4" data-main-cat="ruedas">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">🧪</span><div><div class="card-title">4. Sistema de Pintura</div><div class="card-desc">Especificaciones técnicas.</div></div></div><button class="btn-fav" onclick="toggleFavorite('rueda-4', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Carpeta SP</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:f:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IgArUo3htYJ3SbVaNMabkWZ5AZJMK2dvvE9CPgvDLGh2lc0?e=N0rpUC" target="_blank" onclick="trackLastDoc('4. Sistema de Pintura', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="rueda-5" data-main-cat="ruedas">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">📦</span><div><div class="card-title">5. Embalaje</div><div class="card-desc">Cajas (E1-CV, E2-CVA).</div></div></div><button class="btn-fav" onclick="toggleFavorite('rueda-5', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Excel</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:x:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IQAe_IE2DpA5TL5rE2IxNhMZAQ9K4wpDuvsNCL9yk2ZOhUA?e=eVJF8W" target="_blank" onclick="trackLastDoc('5. Embalaje', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="rueda-6" data-main-cat="ruedas">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">📅</span><div><div class="card-title">6. Planif. Cabinas</div><div class="card-desc">Programación diaria CAF.</div></div></div><button class="btn-fav" onclick="toggleFavorite('rueda-6', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Excel</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:x:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IQC8vk6WAIA2Q5xWywi_hJ7UAUJVCXgcgarMcSJO-ZpzO3E?e=Zx6un3&sheet=PLANIFICACIÓN&ActiveCell=PLANIFICACIÓN!A1" target="_blank" onclick="trackLastDoc('6. Planif. Cabinas', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="rueda-7" data-main-cat="ruedas">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">🖌</span><div><div class="card-title">7. Planif. Brochazo</div><div class="card-desc">Retocado manual CAF.</div></div></div><button class="btn-fav" onclick="toggleFavorite('rueda-7', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Excel</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:x:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IQC8vk6WAIA2Q5xWywi_hJ7UAUJVCXgcgarMcSJO-ZpzO3E?e=1t530y&sheet=PLANIFICACIÓN_B&ActiveCell=PLANIFICACIÓN_B!A1" target="_blank" onclick="trackLastDoc('7. Planif. Brochazo', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="rueda-8" data-main-cat="ruedas">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">🚛</span><div><div class="card-title">8. Pedidos</div><div class="card-desc">Seguimiento y camiones</div></div></div><button class="btn-fav" onclick="toggleFavorite('rueda-8', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Excel</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:x:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IQC8vk6WAIA2Q5xWywi_hJ7UAUJVCXgcgarMcSJO-ZpzO3E?e=uyeJvG&sheet=CAMIONES&ActiveCell=CAMIONES!A1" target="_blank" onclick="trackLastDoc('8. Pedidos (Camiones)', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="eje-s-1" data-main-cat="eje-suelto">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">🧪</span><div><div class="card-title">Sistema de Pintura</div><div class="card-desc">Procesos para ejes.</div></div></div><button class="btn-fav" onclick="toggleFavorite('eje-s-1', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Carpeta SP</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:f:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IgArUo3htYJ3SbVaNMabkWZ5AZJMK2dvvE9CPgvDLGh2lc0?e=0gbPzC" target="_blank" onclick="trackLastDoc('Sistema de Pintura (Eje)', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="eje-s-2" data-main-cat="eje-suelto">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">📐</span><div><div class="card-title">Planos de Eje Suelto</div><div class="card-desc">Especificaciones ejes.</div></div></div><button class="btn-fav" onclick="toggleFavorite('eje-s-2', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Carpeta FZ</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:f:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IgBzZVPYZHRyRLMG6dlgGX9kAZUoFjrW_EmmiV8V2RoXBek?e=fMHSId" target="_blank" onclick="trackLastDoc('Planos de Eje Suelto', this.href)">Abrir →</a></div>
+                </div>
+                <div class="card" data-id="eje-m-2" data-main-cat="eje-montado">
+                    <div class="card-top-row"><div class="card-header"><span class="card-icon">📐</span><div><div class="card-title">Planos de Eje Montado</div><div class="card-desc">Conjuntos montados.</div></div></div><button class="btn-fav" onclick="toggleFavorite('eje-m-2', event)">★</button></div>
+                    <div class="card-footer"><span class="badge">Carpeta FZ</span><a class="card-link" href="https://railsolutionsslu-my.sharepoint.com/:f:/g/personal/aplitek_railsolutionsslu_onmicrosoft_com/IgBdpT7CFabWTZycomGY-t5AAQfkGwef6q-D4T4gNTIqc4k?e=Q6JQXs" target="_blank" onclick="trackLastDoc('Planos de Eje Montado', this.href)">Abrir →</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-item active" onclick="showMainSelector()">
+            <span class="nav-icon">🏠</span>
+            <span>Menú</span>
+        </button>
+        <button class="nav-item" onclick="openFavorites()">
+            <span class="nav-icon">⭐</span>
+            <span>Favoritos</span>
+        </button>
+        <button class="nav-item" onclick="openSection('ruedas', 'RUEDAS DE TREN')">
+            <span class="nav-icon">⚙</span>
+            <span>Ruedas</span>
+        </button>
+        <button class="nav-item" onclick="openSection('eje-suelto', 'EJE SUELTO')">
+            <span class="nav-icon">📏</span>
+            <span>Eje Suelto</span>
+        </button>
+        <button class="nav-item" onclick="openSection('eje-montado', 'EJE MONTADO')">
+            <span class="nav-icon">🚆</span>
+            <span>Eje Montado</span>
+        </button>
+    </nav>
+
+    <script>
+        const canvas = document.getElementById('ai-neural-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let numParticles = 40;
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.8;
+                this.vy = (Math.random() - 0.5) * 0.8;
+                this.radius = Math.random() * 2 + 1.5;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                const isLight = document.body.classList.contains('light-mode');
+                ctx.fillStyle = isLight ? 'rgba(2, 132, 199, 0.4)' : 'rgba(0, 240, 255, 0.5)';
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateNeuralBackground() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isLight = document.body.classList.contains('light-mode');
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                for (let j = i + 1; j < particles.length; j++) {
+                    let dx = particles[i].x - particles[j].x;
+                    let dy = particles[i].y - particles[j].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 130) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        let alpha = (1 - (dist / 130)) * 0.25;
+                        ctx.strokeStyle = isLight ? `rgba(2, 132, 199, ${alpha})` : `rgba(0, 240, 255, ${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateNeuralBackground);
+        }
+        animateNeuralBackground();
+
+        let currentViewMode = ''; 
+        let currentCategoryKey = '';
+        let favorites = JSON.parse(localStorage.getItem('aplitapp_favs')) || [];
+        let weatherCacheData = null;
+
+        function dismissSplash() {
+            const splash = document.getElementById('splash-screen');
+            if (splash && splash.style.display !== 'none') {
+                splash.style.transition = 'opacity 0.3s ease';
+                splash.style.opacity = '0';
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        setTimeout(dismissSplash, 2000);
+
+        window.addEventListener('DOMContentLoaded', function() {
+            initThemePreference();
+            updateFavIcons();
+            initNetworkMonitor();
+            setLastUpdateTimestamp();
+            initClock();
+            loadLastDoc();
+            loadAmorebietaWeather();
+            initServiceWorker();
+        });
+
+        // Registro del Service Worker para Modo Offline
+        function initServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('./sw.js')
+                        .then(reg => console.log('Service Worker registrado con éxito:', reg.scope))
+                        .catch(err => console.log('Error al registrar el Service Worker:', err));
+                });
+            }
+        }
+
+        function initThemePreference() {
+            const savedTheme = localStorage.getItem('aplitapp_theme');
+            const btn = document.getElementById('themeToggleBtn');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+                if (btn) btn.innerText = '☀️';
+            } else {
+                document.body.classList.remove('light-mode');
+                if (btn) btn.innerText = '🌙';
+            }
+        }
+
+        function toggleTheme() {
+            const btn = document.getElementById('themeToggleBtn');
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                localStorage.setItem('aplitapp_theme', 'light');
+                if (btn) btn.innerText = '☀️';
+            } else {
+                localStorage.setItem('aplitapp_theme', 'dark');
+                if (btn) btn.innerText = '🌙';
+            }
+        }
+
+        function initClock() {
+            function updateClock() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const clockEl = document.getElementById('headerClock');
+                if (clockEl) clockEl.innerText = `${hours}:${minutes}`;
+            }
+            updateClock();
+            setInterval(updateClock, 10000);
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        async function loadAmorebietaWeather() {
+            const gridContainer = document.getElementById('weatherDaysGrid');
+            const statusTime = document.getElementById('weatherStatusTime');
+            if (!gridContainer) return;
+
+            try {
+                const url = 'https://api.open-meteo.com/v1/forecast?latitude=43.225&longitude=-2.733&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&hourly=temperature_2m,weathercode,precipitation_probability&timezone=Europe%2FMadrid';
+                let response = await fetch(url);
+                let data = await response.json();
+
+                if (data && data.daily && data.hourly) {
+                    weatherCacheData = data;
+                    let html = '';
+                    let days = data.daily.time;
+                    let maxTemps = data.daily.temperature_2m_max;
+                    let minTemps = data.daily.temperature_2m_min;
+                    let codes = data.daily.weathercode;
+                    let rainMax = data.daily.precipitation_probability_max || [];
+
+                    const diasSemana = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+
+                    let now = new Date();
+                    let year = now.getFullYear();
+                    let month = String(now.getMonth() + 1).padStart(2, '0');
+                    let dayNum = String(now.getDate()).padStart(2, '0');
+                    let currentHourStr = `${year}-${month}-${dayNum}T${String(now.getHours()).padStart(2, '0')}:00`;
+                    
+                    let currentTemp = '--';
+                    let currentIcon = '🌤️';
+                    let currentRain = 0;
+
+                    let hourlyTimes = data.hourly.time;
+                    let hourlyTemps = data.hourly.temperature_2m;
+                    let hourlyCodes = data.hourly.weathercode;
+                    let hourlyRainArr = data.hourly.precipitation_probability;
+
+                    let hourIndex = hourlyTimes.indexOf(currentHourStr);
+                    if (hourIndex !== -1) {
+                        currentTemp = Math.round(hourlyTemps[hourIndex]) + '°';
+                        currentIcon = getWeatherIcon(hourlyCodes[hourIndex]);
+                        currentRain = hourlyRainArr[hourIndex] || 0;
+                    } else if (hourlyTemps.length > 0) {
+                        currentTemp = Math.round(hourlyTemps[0]) + '°';
+                        currentIcon = getWeatherIcon(hourlyCodes[0]);
+                        currentRain = hourlyRainArr[0] || 0;
+                    }
+
+                    html += `
+                        <div class="weather-day-card now-card" onclick="openHourlyModal(0, 'Hoy (${days[0]})', '${days[0]}', true)">
+                            <span class="weather-day-name now-text">AHORA</span>
+                            <span class="weather-day-icon">${currentIcon}</span>
+                            <div class="weather-day-temps">
+                                <span class="temp-max" style="color:var(--accent-blue); font-size:0.75rem;">${currentTemp}</span>
+                                <span class="rain-prob">💧 ${currentRain}%</span>
+                            </div>
+                        </div>
+                    `;
+
+                    for (let i = 1; i < Math.min(7, days.length); i++) {
+                        let dateObj = new Date(days[i]);
+                        let nombreDia = diasSemana[dateObj.getDay()];
+                        let tMax = Math.round(maxTemps[i]);
+                        let tMin = Math.round(minTemps[i]);
+                        let iconoTiempo = getWeatherIcon(codes[i]);
+                        let rProb = rainMax[i] !== undefined ? rainMax[i] : 0;
+
+                        html += `
+                            <div class="weather-day-card" onclick="openHourlyModal(${i}, '${nombreDia} (${days[i]})', '${days[i]}', false)">
+                                <span class="weather-day-name">${nombreDia}</span>
+                                <span class="weather-day-icon">${iconoTiempo}</span>
+                                <div class="weather-day-temps">
+                                    <span class="temp-max">${tMax}°</span>
+                                    <span class="temp-min">${tMin}°</span>
+                                </div>
+                                <span class="rain-prob">💧 ${rProb}%</span>
+                            </div>
+                        `;
+                    }
+                    gridContainer.innerHTML = html;
+                    if (statusTime) statusTime.innerText = 'Actualizado ahora';
+                }
+            } catch (e) {
+                if (statusTime) statusTime.innerText = 'Modo offline';
+            }
+        }
+
+        function openHourlyModal(dayIndex, dayTitle, dateString, isToday) {
+            const modal = document.getElementById('weatherModal');
+            const modalTitle = document.getElementById('modalDayTitle');
+            const scrollContainer = document.getElementById('hourlyScrollContainer');
+            if (!modal || !weatherCacheData || !weatherCacheData.hourly) return;
+
+            modalTitle.innerText = isToday ? `Resto del Día — ${dayTitle}` : `Hora a Hora — ${dayTitle}`;
+
+            let hourlyTimes = weatherCacheData.hourly.time;
+            let hourlyTemps = weatherCacheData.hourly.temperature_2m;
+            let hourlyCodes = weatherCacheData.hourly.weathercode;
+            let hourlyRain = weatherCacheData.hourly.precipitation_probability;
+
+            let now = new Date();
+            let currentIsoString = '';
+            if (isToday) {
+                let year = now.getFullYear();
+                let month = String(now.getMonth() + 1).padStart(2, '0');
+                let dayNum = String(now.getDate()).padStart(2, '0');
+                let hourNum = String(now.getHours()).padStart(2, '0');
+                currentIsoString = `${year}-${month}-${dayNum}T${hourNum}:00`;
+            }
+
+            let html = '';
+            for (let i = 0; i < hourlyTimes.length; i++) {
+                if (hourlyTimes[i].startsWith(dateString)) {
+                    if (isToday && hourlyTimes[i] < currentIsoString) {
+                        continue;
+                    }
+
+                    let horaStr = hourlyTimes[i].split('T')[1];
+                    let temp = Math.round(hourlyTemps[i]);
+                    let icono = getWeatherIcon(hourlyCodes[i]);
+                    let rain = hourlyRain ? hourlyRain[i] : 0;
+
+                    html += `
+                        <div class="hourly-row">
+                            <span class="hourly-time">🕒 ${horaStr}</span>
+                            <div class="hourly-info">
+                                <span class="hourly-rain">💧 ${rain}%</span>
+                                <span>${icono}</span>
+                                <span class="hourly-temp">${temp}°C</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            if (html === '') {
+                html = `<div style="text-align:center; padding: 20px; color: var(--text-sub);">No hay más registros horarios para el día de hoy.</div>`;
+            }
+
+            scrollContainer.innerHTML = html;
+            modal.style.display = 'flex';
+        }
+
+        function closeWeatherModal(event) {
+            const modal = document.getElementById('weatherModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function getWeatherIcon(code) {
+            if (code === 0) return '☀️'; 
+            if ([1, 2].includes(code)) return '⛅'; 
+            if (code === 3) return '☁️'; 
+            if ([45, 48].includes(code)) return '🌫️'; 
+            if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].includes(code)) return '🌧️'; 
+            if ([71, 73, 75, 77, 85, 86].includes(code)) return '❄️'; 
+            if ([95, 96, 99].includes(code)) return '⛈️'; 
+            return '🌤️';
+        }
+
+        function openWhatsAppDirect() {
+            window.open('https://wa.me/?text=%2A', '_blank');
+        }
+
+        function sendEmailNotice() {
+            window.location.href = `mailto:`;
+        }
+
+        function openContactsOrCall() {
+            window.location.href = `tel:`;
+        }
+
+        function trackLastDoc(title, url) {
+            const docData = { title: title, url: url };
+            localStorage.setItem('aplitapp_last_doc', JSON.stringify(docData));
+            loadLastDoc();
+        }
+
+        function loadLastDoc() {
+            const saved = localStorage.getItem('aplitapp_last_doc');
+            if (saved) {
+                try {
+                    const doc = JSON.parse(saved);
+                    const cardInfo = document.getElementById('lastDocTitle');
+                    const cardBtn = document.getElementById('lastDocBtn');
+                    if (cardInfo && cardBtn) {
+                        cardInfo.innerText = doc.title;
+                        cardBtn.href = doc.url;
+                    }
+                } catch(e) {}
+            }
+        }
+
+        function setLastUpdateTimestamp() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const el = document.getElementById('updateTimestamp');
+            if (el) el.innerText = `Act: ${day}/${month}/${year}`;
+        }
+
+        function initNetworkMonitor() {
+            const statusPill = document.getElementById('connectionStatus');
+            if (!statusPill) return;
+            function updateStatus() {
+                if (navigator.onLine) {
+                    statusPill.innerText = '● Online';
+                    statusPill.classList.remove('offline');
+                } else {
+                    statusPill.innerText = '○ Sin Conexión';
+                    statusPill.classList.add('offline');
+                }
+            }
+            window.addEventListener('online', updateStatus);
+            window.addEventListener('offline', updateStatus);
+            updateStatus();
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.view-screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            const target = document.getElementById(screenId);
+            if (target) target.classList.add('active');
+        }
+
+        function showMainSelector() {
+            currentViewMode = '';
+            switchScreen('main-selector-screen');
+            updateNavActive(0);
+        }
+
+        function openSection(categoryKey, titleText) {
+            currentViewMode = 'category';
+            currentCategoryKey = categoryKey;
+            const titleEl = document.getElementById('current-section-title');
+            if (titleEl) titleEl.innerText = titleText;
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.style.display = 'block';
+                searchInput.value = '';
+            }
+
+            removeEmptyState();
+            applyCardFilters();
+            switchScreen('dashboard');
+
+            if (categoryKey === 'ruedas') updateNavActive(2);
+            else if (categoryKey === 'eje-suelto') updateNavActive(3);
+            else if (categoryKey === 'eje-montado') updateNavActive(4);
+        }
+
+        function openFavorites() {
+            currentViewMode = 'favorites';
+            const titleEl = document.getElementById('current-section-title');
+            if (titleEl) titleEl.innerText = 'FAVORITOS ⭐';
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.style.display = 'none';
+
+            removeEmptyState();
+            let visibleCount = 0;
+            document.querySelectorAll('.card').forEach(card => {
+                if (favorites.includes(card.dataset.id)) {
+                    card.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            switchScreen('dashboard');
+            updateNavActive(1);
+
+            if (visibleCount === 0) {
+                const grid = document.getElementById('main-grid');
+                if (grid) {
+                    const empty = document.createElement('div');
+                    empty.className = 'empty-state';
+                    empty.id = 'emptyFavState';
+                    empty.innerHTML = 'No tienes elementos marcados como favoritos.<br>Pulsa la estrella (★) en cualquier tarjeta.';
+                    grid.appendChild(empty);
+                }
+            }
+        }
+
+        function removeEmptyState() {
+            const empty = document.getElementById('emptyFavState');
+            if (empty) empty.remove();
+        }
+
+        function toggleFavorite(cardId, event) {
+            event.stopPropagation();
+            const index = favorites.indexOf(cardId);
+            if (index > -1) favorites.splice(index, 1);
+            else favorites.push(cardId);
+
+            localStorage.setItem('aplitapp_favs', JSON.stringify(favorites));
+            updateFavIcons();
+
+            if (currentViewMode === 'favorites') openFavorites();
+        }
+
+        function updateFavIcons() {
+            document.querySelectorAll('.card').forEach(card => {
+                const btn = card.querySelector('.btn-fav');
+                if (btn) {
+                    if (favorites.includes(card.dataset.id)) {
+                        btn.classList.add('is-favorite');
+                        btn.innerText = '★';
+                    } else {
+                        btn.classList.remove('is-favorite');
+                        btn.innerText = '☆';
+                    }
+                }
+            });
+        }
+
+        function updateNavActive(index) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const navItems = document.querySelectorAll('.nav-item');
+            if (navItems[index]) navItems[index].classList.add('active');
+        }
+
+        function applyCardFilters() {
+            const searchInput = document.getElementById('searchInput');
+            const query = searchInput ? searchInput.value.toLowerCase() : '';
+            document.querySelectorAll('.card').forEach(card => {
+                const matchesCategory = (card.dataset.mainCat === currentCategoryKey);
+                const title = card.querySelector('.card-title').innerText.toLowerCase();
+                const desc = card.querySelector('.card-desc').innerText.toLowerCase();
+                if (matchesCategory && (title.includes(query) || desc.includes(query))) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function filterCards() {
+            if (currentViewMode !== 'category') return;
+            applyCardFilters();
+        }
+    </script>
+</body>
+</html>
