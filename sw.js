@@ -1,7 +1,7 @@
-const CACHE_NAME = 'aplitapp-cache-v3';
+const CACHE_NAME = 'aplitapp-cache-v5';
 const urlsToCache = [
-  './',
-  './index.html'
+  '/AplitAPP/',
+  '/AplitAPP/index.html'
 ];
 
 self.addEventListener('install', event => {
