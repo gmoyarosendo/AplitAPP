@@ -1,10 +1,9 @@
-const CACHE_NAME = 'aplitapp-cache-v1';
+const CACHE_NAME = 'aplitapp-cache-v3';
 const urlsToCache = [
-  './index.html',
-  './PLANIFICACION_B.html'
+  './',
+  './index.html'
 ];
 
-// Instalación del Service Worker y almacenamiento de archivos clave
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -15,7 +14,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Limpieza de cachés antiguas al actualizar
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -30,7 +28,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Interceptar peticiones para servir el contenido sin internet
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
